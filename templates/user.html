@@ -1,0 +1,378 @@
+{% extends 'base.html'%}
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h2>User Dashboard</h2>
+            <a href="{{ url_for('logout') }}" class="btn btn-primary" style="text-decoration: none;">Logout</a>
+        </div>
+
+        <div class="profile-card">
+            <h4>User Profile</h4>
+            <p><strong>Name:</strong> Admin</p>
+            <p><strong>Email:</strong> admin@ebus.com</p>
+            <div class="time-box">
+                <div class="time-item">
+                    <span class="label">Date:</span>
+                    <span id="profileDate"></span>
+                </div>
+                <div class="time-item">
+                    <span class="label">Time:</span>
+                    <span id="profileTime"></span>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Search Form -->
+        <div class="bus-search">
+            <h4>Search for Buses</h4>
+            <form id="busSearchForm" class="form-container">
+                <div class="form-group">
+                    <label for="start_location">From</label>
+                    <select class="form-control" id="start_location" required>
+                        <option value="">Select Start Location</option>
+                        {% for d in drivers %}
+                        <option value="{{ d.start_location }}">{{ d.start_location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="end_location">To</label>
+                    <select class="form-control" id="end_location" required>
+                        <option value="">Select End Location</option>
+                        {% for d in drivers %}
+                        <option value="{{ d.end_location }}">{{ d.end_location }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bus_type">Bus Type</label>
+                    <select class="form-control" id="bus_type" required>
+                        <option value="">Select Bus Type</option>
+                        <option value="Standard">Standard</option>
+                        <option value="Express">Express</option>
+                        <option value="Luxury">Luxury</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-search"></i> Search Bus
+                </button>
+            </form>
+        </div>
+
+        <!-- Popup Modal -->
+        <div id="searchModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Search Results</h3>
+                    <span id="closeModal" class="close">&times;</span>
+                </div>
+                <div id="searchResults"></div>
+            </div>
+        </div>
+
+
+        <!-- All Available Buses -->
+        <div class="results" id="userResults" style="display: block; margin-top: 2rem;">
+            <h3>All Available Buses</h3>
+            <div class="row text-center mb-5">
+                <div class="table-responsive">
+                    <table class="table table-bordered text-center">
+                        <thead>
+                            <tr>
+                                <th>Bus.No</th>
+                                <th>Bus Type</th>
+                                <th>Start Location</th>
+                                <th>Start Time</th>
+                                <th>End Location</th>
+                                <th>End Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in drivers %}
+                            <tr>
+                                <td>{{ d.bus_number }}</td>
+                                <td>{{ d.bus_type }}</td>
+                                <td>{{ d.start_location }}</td>
+                                <td>{{ d.start_time }}</td>
+                                <td>{{ d.end_location }}</td>
+                                <td>{{ d.end_time }}</td>
+                                <td>Available</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Styling -->
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background: #fff;
+        margin: 8% auto;
+        padding: 20px 30px;
+        border-radius: 12px;
+        width: 70%;
+        max-width: 900px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        overflow-y: auto;
+        max-height: 80vh;
+    }
+
+    /* Header inside modal */
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .close {
+        font-size: 26px;
+        cursor: pointer;
+        color: #555;
+        transition: color 0.2s ease;
+    }
+
+    .close:hover {
+        color: #000;
+    }
+
+    /* Table styling inside modal */
+    #searchResults table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: auto;
+        border: 1px solid #ccc;
+    }
+
+    #searchResults th,
+    #searchResults td {
+        padding: 10px 15px;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #ddd;
+    }
+
+    #searchResults th {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+    }
+
+    #searchResults tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    #searchResults tr:hover {
+        background-color: #eef6ff;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .user-profile {
+        margin-bottom: 2.5rem;
+    }
+
+    .profile-card {
+        background: #fff;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .profile-card h4 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .profile-card p {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 0.6rem;
+    }
+
+    /* Added spacing fix */
+    .dashboard-content {
+        margin-top: 2rem;
+    }
+
+    /* Keep the clean time styling */
+    .time-box {
+        margin-top: 1.5rem;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .time-box {
+        margin-top: 1.2rem;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .time-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .time-item .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    #profileDate,
+    #profileTime {
+        font-weight: 500;
+        font-size: 15px;
+        color: #222;
+    }
+</style>
+
+
+
+<!-- JS for popup search -->
+<script>
+    const navLinks = document.querySelectorAll("nav ul li a");
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    navLinks.forEach(link => {
+        link.style.display = "none";
+    })
+    loginBtn.style.display = "none";
+    registerBtn.style.display = "none";
+    document.getElementById("busSearchForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const start_location = document.getElementById("start_location").value;
+        const end_location = document.getElementById("end_location").value;
+        const bus_type = document.getElementById("bus_type").value;
+
+        const response = await fetch("/search_buses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start_location, end_location, bus_type })
+        });
+
+        const data = await response.json();
+        const resultsDiv = document.getElementById("searchResults");
+
+        if (data.buses.length === 0) {
+            resultsDiv.innerHTML = "<p>No buses found for your search.</p>";
+        } else {
+            let table = `
+            <table class="table table-bordered text-center">
+                <thead>
+                    <tr>
+                        <th>Bus.No</th>
+                        <th>Bus Type</th>
+                        <th>Start Location</th>
+                        <th>Start Time</th>
+                        <th>End Location</th>
+                        <th>End Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+            data.buses.forEach(b => {
+                table += `
+                <tr>
+                    <td>${b.bus_number}</td>
+                    <td>${b.bus_type}</td>
+                    <td>${b.start_location}</td>
+                    <td>${b.start_time}</td>
+                    <td>${b.end_location}</td>
+                    <td>${b.end_time}</td>
+                    <td>Available</td>
+                </tr>`;
+            });
+            table += `</tbody></table>`;
+            resultsDiv.innerHTML = table;
+        }
+
+        document.getElementById("searchModal").style.display = "block";
+    });
+
+    // Close modal
+    document.getElementById("closeModal").onclick = function () {
+        document.getElementById("searchModal").style.display = "none";
+        document.querySelector(".modal-content").scrollTop = 0;
+
+    };
+    window.onclick = function (event) {
+        if (event.target === document.getElementById("searchModal")) {
+            document.getElementById("searchModal").style.display = "none";
+        }
+    };
+
+    function updateProfileClock() {
+        const now = new Date();
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const dateOptions = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+
+        document.getElementById("profileTime").textContent = now.toLocaleTimeString([], timeOptions);
+        document.getElementById("profileDate").textContent = now.toLocaleDateString([], dateOptions);
+    }
+
+    setInterval(updateProfileClock, 1000);
+    updateProfileClock();
+</script>
+{% endblock %}

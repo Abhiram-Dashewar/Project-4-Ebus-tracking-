@@ -1,0 +1,241 @@
+{% extends 'base.html'%}
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h2 id="dashboardTitle">Admin Dashboard</h2>
+            <a href="{{url_for('home')}}" class="btn btn-primary" style="text-decoration: none;">Logout</a>
+        </div>
+
+        <div class="profile-card">
+            <h4>User Profile</h4>
+            <p><strong>Name:</strong> Admin</p>
+            <p><strong>Email:</strong> admin@ebus.com</p>
+            <div class="time-box">
+                <div class="time-item">
+                    <span class="label">Date:</span>
+                    <span id="profileDate"></span>
+                </div>
+                <div class="time-item">
+                    <span class="label">Time:</span>
+                    <span id="profileTime"></span>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="dashboard-content">
+            <!-- Admin Content -->
+            <div class="content-section active" id="adminDashboard">
+                <div class="content-header">
+                    <h3>Driver Details</h3>
+                    <button class="btn btn-primary" onclick="openModal('addDriverModal')">Add Driver</button>
+                </div>
+
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Bus No</th>
+                                <th>Type</th>
+                                <th>Capacity</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in drivers %}
+                            <tr>
+                                <td>{{ d.name }}</td>
+                                <td>{{ d.bus_number }}</td>
+                                <td>{{ d.bus_type }}</td>
+                                <td>{{ d.capacity }}</td>
+                                <td>{{ d.start_location }}</td>
+                                <td>{{ d.end_location }}</td>
+                                <td>{{ d.start_time }}</td>
+                                <td>{{ d.end_time }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Add Driver Modal -->
+<div id="addDriverModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Add Driver</h3>
+            <button class="close-modal" onclick="closeModal('addDriverModal')">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('add_driver') }}">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Driver Name</label>
+                    <input type="text" class="form-control" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Bus Number</label>
+                    <input type="text" class="form-control" name="bus_number" required>
+                </div>
+                <div class="form-group">
+                    <label>Bus Type</label>
+                    <select class="form-control" name="bus_type" required>
+                        <option value="Standard">Standard</option>
+                        <option value="Express">Express</option>
+                        <option value="Luxury">Luxury</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Capacity</label>
+                    <input type="number" class="form-control" name="capacity" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Location</label>
+                    <input type="text" class="form-control" name="start_location" placeholder="e.g. Nizamabad" required>
+                </div>
+                <div class="form-group">
+                    <label>End Location</label>
+                    <input type="text" class="form-control" name="end_location" placeholder="e.g. Karimnagar" required>
+                </div>
+                <div class="form-group">
+                    <label>Start Time</label>
+                    <input type="time" class="form-control" name="start_time" required>
+                </div>
+                <div class="form-group">
+                    <label>End Time</label>
+                    <input type="time" class="form-control" name="end_time" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Add Driver</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem 1.5rem;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .user-profile {
+        margin-bottom: 2.5rem;
+    }
+
+    .profile-card {
+        background: #fff;
+        padding: 1.5rem 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .profile-card h4 {
+        margin-bottom: 1rem;
+        color: #2c3e50;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .profile-card p {
+        font-size: 1rem;
+        color: #555;
+        margin-bottom: 0.6rem;
+    }
+
+    /* Added spacing fix */
+    .dashboard-content {
+        margin-top: 2rem;
+    }
+
+    /* Keep the clean time styling */
+    .time-box {
+        margin-top: 1.5rem;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .time-box {
+        margin-top: 1.2rem;
+        padding: 12px 15px;
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .time-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 15px;
+        color: #333;
+    }
+
+    .time-item .label {
+        font-weight: 600;
+        color: #555;
+    }
+
+    #profileDate,
+    #profileTime {
+        font-weight: 500;
+        font-size: 15px;
+        color: #222;
+    }
+</style>
+
+
+
+<script>
+    const navLinks = document.querySelectorAll("nav ul li a");
+    const loginBtn = document.getElementById('loginBtn');
+    const registerBtn = document.getElementById('registerBtn');
+    navLinks.forEach(link => {
+        link.style.display = "none";
+    })
+    loginBtn.style.display = "none";
+    registerBtn.style.display = "none";
+    function updateProfileClock() {
+        const now = new Date();
+        const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+        const dateOptions = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+
+        document.getElementById("profileTime").textContent = now.toLocaleTimeString([], timeOptions);
+        document.getElementById("profileDate").textContent = now.toLocaleDateString([], dateOptions);
+    }
+
+    setInterval(updateProfileClock, 1000);
+    updateProfileClock();
+</script>
+
+{% endblock %}

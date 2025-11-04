@@ -1,0 +1,738 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-content {
+        background: #fff;
+        margin: 8% auto;
+        padding: 20px 30px;
+        border-radius: 12px;
+        width: 70%;
+        max-width: 900px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+        overflow-y: auto;
+        max-height: 80vh;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #eee;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .close {
+        font-size: 26px;
+        cursor: pointer;
+        color: #555;
+        transition: color 0.2s ease;
+    }
+
+    .close:hover {
+        color: #000;
+    }
+
+    #trackResults table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: auto;
+        border: 1px solid #ccc;
+    }
+
+    #trackResults th,
+    #trackResults td {
+        padding: 10px 15px;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px solid #ddd;
+    }
+
+    #trackResults th {
+        background-color: #007bff;
+        color: white;
+        font-weight: 600;
+    }
+
+    #trackResults tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    #trackResults tr:hover {
+        background-color: #eef6ff;
+    }
+
+    .live-clock-container {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 420px;
+        background: #f7f9fc;
+        border-radius: 20px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+        color: #333;
+        margin-top: 40px;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .analog-clock {
+        position: relative;
+        width: 280px;
+        height: 280px;
+        border: 8px solid #ddd;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .hand {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: bottom center;
+        transform: translate(-50%, -100%) rotate(0deg);
+        border-radius: 4px;
+    }
+
+    .hand.hour {
+        width: 6px;
+        height: 70px;
+        background: #222;
+    }
+
+    .hand.minute {
+        width: 4px;
+        height: 100px;
+        background: #555;
+    }
+
+    .hand.second {
+        width: 2px;
+        height: 120px;
+        background: #e63946;
+    }
+
+    .center-dot {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #e63946;
+        border-radius: 50%;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .clock-card {
+        margin-top: 25px;
+        background: transparent;
+        text-align: center;
+    }
+
+    .time-line {
+        font-size: 22px;
+        font-weight: 500;
+        margin: 6px 0;
+    }
+
+    .label {
+        font-weight: 600;
+        color: #007bff;
+        margin-right: 8px;
+    }
+
+    #liveTime {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: #222;
+    }
+
+    #liveDate {
+        font-size: 20px;
+        font-weight: 600;
+        color: #444;
+    }
+</style>
+
+<main class="mainContent">
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Real-Time Bus Location Tracking</h2>
+                <p>Revolutionizing public transportation with accurate bus arrival predictions and real-time
+                    location tracking to reduce wait times and improve passenger experience.</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary btn-large" id="trackNowBtn"><i class="fas fa-map-marker-alt"></i>
+                        Track Bus Now</button>
+                    <button class="btn btn-outline btn-large"><i class="fas fa-play-circle"></i> Watch Demo</button>
+                </div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="busCount">0</div>
+                        <div class="stat-label">Active Buses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="userCount">0</div>
+                        <div class="stat-label">Happy Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="cityCount">0</div>
+                        <div class="stat-label">Cities Covered</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="accuracyCount">0%</div>
+                        <div class="stat-label">Prediction Accuracy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about">
+        <div class="container">
+            <div class="section-title">
+                <h2>About The Project</h2>
+                <p>Intelligent transportation system designed to enhance public transit experience through real-time
+                    tracking and predictive analytics.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Advanced Traveler Information System</h3>
+                    <p>Our Ebus Management System is a comprehensive solution that leverages real-time location data
+                        to provide accurate bus arrival predictions. This system addresses the critical need for
+                        precise and reliable public transportation information.</p>
+                    <p>By analyzing bus arrival times and linger times at previous stops, our prediction model
+                        significantly improves accuracy, reducing passenger anxiety and wait times at bus stops
+                        while increasing overall satisfaction with public transit services.</p>
+                    <div class="about-features">
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Real-time GPS Tracking</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Accurate Arrival Predictions</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Multi-platform Support</span>
+                        </div>
+                        <div class="about-feature">
+                            <i class="fas fa-check-circle"></i>
+                            <span>User-friendly Interface</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+                        alt="Bus Tracking System">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>Key Features</h2>
+                <p>Our system offers a comprehensive set of features designed to improve the public transportation
+                    experience for all stakeholders.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <h3>Real-Time Tracking</h3>
+                    <p>Monitor bus locations in real-time with high precision using GPS technology and advanced
+                        algorithms.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Accurate Predictions</h3>
+                    <p>Get reliable arrival time predictions based on historical data and current traffic
+                        conditions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <h3>Multi-User Support</h3>
+                    <p>Designed for administrators, drivers, and passengers with tailored interfaces for each user
+                        type.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsive Design</h3>
+                    <p>Access the system from any device - desktop, tablet, or smartphone with a seamless
+                        experience.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3>Cloud-Based</h3>
+                    <p>Utilizes Firebase for secure, scalable data storage and real-time synchronization across all
+                        devices.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Analytics & Reporting</h3>
+                    <p>Gain insights into bus performance, passenger patterns, and system efficiency with detailed
+                        reports.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modules Section -->
+    <section id="modules">
+        <div class="container">
+            <div class="section-title">
+                <h2>System Modules</h2>
+                <p>Our system is divided into three main user modules, each with specific functionalities tailored
+                    to different user roles.</p>
+            </div>
+            <div class="modules-tabs">
+                <button class="tab-btn active" data-tab="admin">Admin Module</button>
+                <button class="tab-btn" data-tab="driver">Driver Module</button>
+                <button class="tab-btn" data-tab="user">User Module</button>
+            </div>
+            <div class="tab-content active" id="admin-tab">
+                <div class="module-card">
+                    <h3><i class="fas fa-user-shield"></i> Administrator Functions</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Create and manage system login credentials</li>
+                        <li><i class="fas fa-check-circle"></i> Register and authorize drivers/travel operators</li>
+                        <li><i class="fas fa-check-circle"></i> Monitor system performance and user activity</li>
+                        <li><i class="fas fa-check-circle"></i> Generate comprehensive reports and analytics</li>
+                        <li><i class="fas fa-check-circle"></i> Manage bus routes and schedules</li>
+                        <li><i class="fas fa-check-circle"></i> Oversee system security and data integrity</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content" id="driver-tab">
+                <div class="module-card">
+                    <h3><i class="fas fa-user-tie"></i> Driver/Travel Operator Functions</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> Secure login to the system</li>
+                        <li><i class="fas fa-check-circle"></i> Post complete bus information</li>
+                        <li><i class="fas fa-check-circle"></i> Specify bus type and capacity details</li>
+                        <li><i class="fas fa-check-circle"></i> Update contact information</li>
+                        <li><i class="fas fa-check-circle"></i> Manage route assignments</li>
+                        <li><i class="fas fa-check-circle"></i> Update real-time location data</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content" id="user-tab">
+                <div class="module-card">
+                    <h3><i class="fas fa-users"></i> Passenger Functions</h3>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> User registration and login</li>
+                        <li><i class="fas fa-check-circle"></i> View bus details and schedules</li>
+                        <li><i class="fas fa-check-circle"></i> Search bus locations by source and destination</li>
+                        <li><i class="fas fa-check-circle"></i> Access real-time arrival predictions</li>
+                        <li><i class="fas fa-check-circle"></i> Save favorite routes and stops</li>
+                        <li><i class="fas fa-check-circle"></i> Receive notifications and alerts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Technologies Section -->
+    <section>
+        <div class="container">
+            <div class="section-title">
+                <h2>Technologies Used</h2>
+                <p>Our system is built with modern web technologies to ensure performance, security, and
+                    scalability.</p>
+            </div>
+            <div class="tech-icons">
+                <div class="tech-icon">
+                    <i class="fab fa-html5"></i>
+                    <span>HTML5</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fab fa-css3-alt"></i>
+                    <span>CSS3</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fab fa-js-square"></i>
+                    <span>JavaScript</span>
+                </div>
+                <div class="tech-icon">
+                    <i class="fas fa-database"></i>
+                    <span>Firebase</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section class="demo" id="demo">
+        <div class="container">
+            <div class="section-title">
+                <h2>Track Your Bus</h2>
+                <p>Experience how our system works with this interactive demonstration.</p>
+            </div>
+            <div class="demo-container">
+                <div class="demo-content">
+                    <h3>Find Your Bus in Real-Time</h3>
+                    <p>Our system allows you to search for buses based on your source and destination locations,
+                        enabling you to reach the bus stop at the correct time instead of waiting for long periods.
+                    </p>
+                    <p>Simply enter your starting point and destination to see available buses, their current
+                        locations, and estimated arrival times.</p>
+                    <div class="bus-search">
+                        <h4>Track Bus by Route</h4>
+                        <form id="trackForm" method="POST">
+                            <div class="search-form">
+                                <div class="form-group">
+                                    <label for="start_location">From</label>
+                                    <select class="form-control" id="start_location" required>
+                                        <option value="">Select Start Location</option>
+                                        {% for d in drivers %}
+                                        <option value="{{ d.start_location }}">{{ d.start_location }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="end_location">To</label>
+                                    <select class="form-control" id="end_location" required>
+                                        <option value="">Select End Location</option>
+                                        {% for d in drivers %}
+                                        <option value="{{ d.end_location }}">{{ d.end_location }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary" style="height: 46px; width: 100%;">
+                                        <i class="fas fa-search"></i> Track
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Popup Modal for Results -->
+                    <div id="trackModal" class="modal" style="display:none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3>Bus Results</h3>
+                                <span id="closeTrackModal" class="close">&times;</span>
+                            </div>
+                            <div id="trackResults"></div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="live-clock-container">
+                    <div class="analog-clock">
+                        <!-- Clock hands -->
+                        <div class="hand hour" id="hour-hand"></div>
+                        <div class="hand minute" id="minute-hand"></div>
+                        <div class="hand second" id="second-hand"></div>
+                        <div class="center-dot"></div>
+                    </div>
+
+                    <div class="clock-card">
+                        <div class="time-line">
+                            <span class="label">Time:</span>
+                            <span id="liveTime"></span>
+                        </div>
+                        <div class="time-line">
+                            <span class="label">Date:</span>
+                            <span id="liveDate"></span>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+        </div>
+    </section>
+</main>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Registration form handling
+        const registerForm = document.getElementById('registerForm');
+        const registerMessage = document.getElementById('registerMessage');
+        const registerFormContainer = document.getElementById('registerFormContainer');
+        const loginSection = document.getElementById('login');
+        const showLoginLink = document.getElementById('showLoginLink');
+        const showRegisterLink = document.getElementById('showRegisterLink');
+
+        // Login form handling
+        const loginForm = document.getElementById('loginForm');
+        const loginMessage = document.getElementById('loginMessage');
+
+        // Show login form
+        showLoginLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.getElementById('register').style.display = 'none';
+            loginSection.style.display = 'block';
+        });
+
+        // Show register form
+        showRegisterLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            loginSection.style.display = 'none';
+            document.getElementById('register').style.display = 'block';
+        });
+
+        // Handle registration
+        registerForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const existingUser = localStorage.getItem(email);
+            if (existingUser) {
+                registerMessage.textContent = 'Email already registered. Please login.';
+                registerMessage.className = 'alert error';
+                registerMessage.style.display = 'block';
+                return;
+            }
+
+            const userData = { name, email, password, role };
+            localStorage.setItem(email, JSON.stringify(userData));
+
+            registerMessage.textContent = 'Registration successful! Please login.';
+            registerMessage.className = 'alert success';
+            registerMessage.style.display = 'block';
+
+            setTimeout(function () {
+                registerFormContainer.style.display = 'none';
+                loginSection.style.display = 'block';
+            }, 2000);
+        });
+
+        // Handle login
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const userData = localStorage.getItem(email);
+            if (!userData) {
+                loginMessage.textContent = 'Email not found. Please register.';
+                loginMessage.className = 'alert error';
+                loginMessage.style.display = 'block';
+                return;
+            }
+
+            const user = JSON.parse(userData);
+            if (user.password !== password) {
+                loginMessage.textContent = 'Invalid password.';
+                loginMessage.className = 'alert error';
+                loginMessage.style.display = 'block';
+                return;
+            }
+
+            if (user.role === 'admin') {
+                window.location.href = '/admin';
+            } else if (user.role === 'driver') {
+                window.location.href = '/driver';
+            } else {
+                window.location.href = '/user';
+            }
+        });
+
+        // ✅ Animate stats on page load
+        animateStats();
+    });
+
+    // Animate stats when the whole page (including images) has loaded
+    window.addEventListener("load", () => {
+        animateStats();
+    });
+
+    function animateStats() {
+        const busCount = document.getElementById('busCount');
+        const userCount = document.getElementById('userCount');
+        const cityCount = document.getElementById('cityCount');
+        const accuracyCount = document.getElementById('accuracyCount');
+
+        // If any element is missing, exit quietly (prevents errors)
+        if (!busCount || !userCount || !cityCount || !accuracyCount) return;
+
+        let busCounter = 0;
+        let userCounter = 0;
+        let cityCounter = 0;
+        let accuracyCounter = 0;
+
+        const busInterval = setInterval(() => {
+            busCounter += 7;
+            if (busCounter >= 142) {
+                busCounter = 142;
+                clearInterval(busInterval);
+            }
+            busCount.textContent = busCounter;
+        }, 30);
+
+        const userInterval = setInterval(() => {
+            userCounter += 50;
+            if (userCounter >= 12500) {
+                userCounter = 12500;
+                clearInterval(userInterval);
+            }
+            userCount.textContent = userCounter.toLocaleString();
+        }, 10);
+
+        const cityInterval = setInterval(() => {
+            cityCounter += 1;
+            if (cityCounter >= 18) {
+                cityCounter = 18;
+                clearInterval(cityInterval);
+            }
+            cityCount.textContent = cityCounter;
+        }, 100);
+
+        const accuracyInterval = setInterval(() => {
+            accuracyCounter += 1;
+            if (accuracyCounter >= 95) {
+                accuracyCounter = 95;
+                clearInterval(accuracyInterval);
+            }
+            accuracyCount.textContent = `${accuracyCounter}%`;
+        }, 30);
+    }
+    // Handle track bus search
+    document.getElementById("trackForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const start_location = document.getElementById("start_location").value;
+        const end_location = document.getElementById("end_location").value;
+
+        const response = await fetch("/track_buses", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start_location, end_location })
+        });
+
+        const data = await response.json();
+        const resultsDiv = document.getElementById("trackResults");
+
+        if (data.buses.length === 0) {
+            resultsDiv.innerHTML = "<p>No upcoming buses found for this route.</p>";
+        } else {
+            let table = `
+        <table class="table table-bordered text-center">
+            <thead>
+                <tr>
+                    <th>Bus.No</th>
+                    <th>Bus Type</th>
+                    <th>Start Location</th>
+                    <th>Start Time</th>
+                    <th>End Location</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>`;
+            const now = new Date();
+            data.buses.forEach(b => {
+                const [hour, minute] = b.start_time.split(":").map(Number);
+                const startTime = new Date();
+                startTime.setHours(hour, minute, 0, 0);
+                const diff = (startTime - now) / 60000; // difference in minutes
+                const status = diff <= 30 ? "Starting Soon" : "Scheduled";
+
+                table += `
+                        <tr style="${status === 'Starting Soon' ? 'background:#dff0d8;' : ''}">
+                            <td>${b.bus_number}</td>
+                            <td>${b.bus_type}</td>
+                            <td>${b.start_location}</td>
+                            <td>${b.start_time}</td>
+                            <td>${b.end_location}</td>
+                            <td>${b.end_time}</td>
+                            <td>${status}</td>
+                        </tr>`;
+            });
+            table += `</tbody></table>`;
+            resultsDiv.innerHTML = table;
+        }
+
+        document.getElementById("trackModal").style.display = "block";
+    });
+
+    document.getElementById("closeTrackModal").onclick = function () {
+        document.getElementById("trackModal").style.display = "none";
+    };
+    window.onclick = function (event) {
+        if (event.target === document.getElementById("trackModal")) {
+            document.getElementById("trackModal").style.display = "none";
+        }
+    };
+
+    function updateClock() {
+        const now = new Date();
+
+        // Digital time (24-hour format)
+        const timeString = now.toLocaleTimeString('en-GB', { hour12: false });
+        document.getElementById("liveTime").textContent = timeString;
+
+        // Date with day and month
+        const dateOptions = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+        document.getElementById("liveDate").textContent = now.toLocaleDateString('en-GB', dateOptions);
+
+        // Analog clock hands
+        const seconds = now.getSeconds();
+        const minutes = now.getMinutes();
+        const hours = now.getHours();
+
+        const secondDeg = seconds * 6;
+        const minuteDeg = minutes * 6 + seconds * 0.1;
+        const hourDeg = (hours % 12) * 30 + minutes * 0.5;
+
+        document.getElementById("second-hand").style.transform = `translate(-50%, -100%) rotate(${secondDeg}deg)`;
+        document.getElementById("minute-hand").style.transform = `translate(-50%, -100%) rotate(${minuteDeg}deg)`;
+        document.getElementById("hour-hand").style.transform = `translate(-50%, -100%) rotate(${hourDeg}deg)`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+
+{% endblock %}
