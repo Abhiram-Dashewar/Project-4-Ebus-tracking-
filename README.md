@@ -17,7 +17,7 @@ The project is built with Flask (backend), Jinja2 templates (server-side UI), st
 - Search for buses between start and destination stops.
 
 ### Login Credentials
-- Username: 'admin@ebus.com
+- Username: 'admin@ebus.com'
 - Password: 'password'
 
 ---
