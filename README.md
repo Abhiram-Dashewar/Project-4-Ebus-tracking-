@@ -36,6 +36,6 @@ The project is built with Flask (backend), Jinja2 templates (server-side UI), st
 
 1. **Clone**
 ```bash
-git clone https://github.com/Abhiram-Dashewar/ebus-tracking-management.git
-cd ebus-tracking-management
+git clone https://github.com/Abhiram-Dashewar/Project-4-Ebus-tracking-.git
+cd Project-4-Ebus-tracking-
 python app.py
