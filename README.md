@@ -20,7 +20,7 @@ The project is built with Flask (backend), Jinja2 templates (server-side UI), st
 - Username: 'admin@ebus.com'
 - Password: 'password'
 
-[Catering Management Live site] (https://project-4-ebus-tracking.onrender.com)
+[Catering Management Live site](https://project-4-ebus-tracking.onrender.com)
 
 ---
 
