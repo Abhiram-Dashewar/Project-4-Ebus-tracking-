@@ -21,7 +21,7 @@ The project is built with Flask (backend), Jinja2 templates (server-side UI), st
 - Password: 'password'
 
 ### Live site Link
-- [Catering Management Live site](https://project-4-ebus-tracking.onrender.com)
+- [Ebus Management](https://project-4-ebus-tracking.onrender.com)
 
 ---
 
