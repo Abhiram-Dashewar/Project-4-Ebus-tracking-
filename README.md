@@ -1,6 +1,6 @@
 # 🚍 E-Bus Tracking & Management — Project 4
 
-**E-Bus Tracking & Management** is a full-stack web application that provides real-time bus tracking, route and schedule management, driver assignment, and a user-facing booking/lookup interface.  
+## **E-Bus Tracking & Management** is a full-stack web application that provides real-time bus tracking, route and schedule management, driver assignment, and a user-facing booking/lookup interface.  
 The project is built with Flask (backend), Jinja2 templates (server-side UI), standard web frontend (HTML/CSS/JavaScript), and a relational database (SQLite / MySQL).
 ---
 
